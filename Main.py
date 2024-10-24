@@ -4,9 +4,9 @@ October 24, 2024
 Tic tac toe with Minimax implementation for player and computer
 """
 
-board = [" " for _ in range(9)]
-player1 = "1"
-player2 = "2"
+board = [" " for i in range(9)]
+player1 = "O"
+player2 = "X"
 
 
 def displayBoard(board):
