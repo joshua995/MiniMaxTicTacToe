@@ -15,10 +15,10 @@ public class TicTacToe {
     public static void main(String[] args) {
         while (true) {
             displayBoard(board);
-            System.out.println("Enter a spot: ");
+            System.out.println("Enter a spot (0-8): ");
             String playerMove = scanner.nextLine();
             while (playerMove != "help" && board[Integer.parseInt(playerMove)] != " ") {
-                System.out.println("Taken, Enter a different spot: ");
+                System.out.println("Taken, Enter a different spot (0-8): ");
                 playerMove = scanner.nextLine();
             }
             if (playerMove.contains("help"))
