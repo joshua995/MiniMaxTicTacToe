@@ -18,7 +18,6 @@ def displayBoard(board):
 
 def makeMove(board, position, currentPlayer):
     board[position] = currentPlayer
-    # return board
 
 
 def checkWinner(board, player):
