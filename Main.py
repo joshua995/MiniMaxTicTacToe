@@ -1,3 +1,9 @@
+"""
+Joshua Liu
+October 24, 2024
+Tic tac toe with Minimax implementation for player and computer
+"""
+
 board = [" " for _ in range(9)]
 player1 = "1"
 player2 = "2"
@@ -105,7 +111,6 @@ def makeBestMove(board):
         makeMove(board, moveToMake, player2)
 
 
-
 def makeBestMoveForPlayer(board):
     moveToMake = -1
     bestScore = -1
@@ -124,11 +129,13 @@ def makeBestMoveForPlayer(board):
 if __name__ == "__main__":
     while 2:
         displayBoard(board)
-        # playerMove = input("Enter a spot: ")
-        # while board[int(playerMove[0])] != " ":
-        #     playerMove = input("Taken, Enter a spot: ")
-        # makeMove(board, int(playerMove[0]), player1)
-        makeBestMoveForPlayer(board)
+        playerMove = input("Enter a spot: ")
+        while playerMove != "help" and board[int(playerMove[0])] != " ":
+            playerMove = input("Taken, Enter a spot: ")
+        if playerMove.__contains__("help"):
+            makeBestMoveForPlayer(board)
+        else:
+            makeMove(board, int(playerMove[0]), player1)
         if checkWinner(board, player1) == player1:
             print("Winner!")
             break
