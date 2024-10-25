@@ -45,7 +45,6 @@ def miniMax(board, depth, isMaximizing):
         return -2
     elif isDraw(board):
         return 0
-
     if isMaximizing:
         bestScore = -1
         for i, spot in enumerate(board):

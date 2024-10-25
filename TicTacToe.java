@@ -17,11 +17,11 @@ public class TicTacToe {
             displayBoard(board);
             System.out.println("Enter a spot (0-8): ");
             String playerMove = scanner.nextLine();
-            while (playerMove != "help" && board[Integer.parseInt(playerMove)] != " ") {
-                System.out.println("Taken, Enter a different spot (0-8): ");
+            while (board[Integer.parseInt(playerMove)] != " ") {
+                System.out.println("Taken, Enter a different spot (0-8) or 9 for minimax: ");
                 playerMove = scanner.nextLine();
             }
-            if (playerMove.contains("help"))
+            if (playerMove.contains("9"))
                 makeBestMove(board, player1, player2);
             else
                 makeMove(board, Integer.parseInt(playerMove), player1);
