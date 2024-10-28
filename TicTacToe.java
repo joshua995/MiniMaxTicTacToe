@@ -1,3 +1,4 @@
+
 /*
  * Joshua Liu
  * October 24, 2024
@@ -17,9 +18,11 @@ public class TicTacToe {
             displayBoard(board);
             System.out.println("Enter a spot (0-8): ");
             String playerMove = scanner.nextLine();
-            while (board[Integer.parseInt(playerMove)] != " ") {
+            while (!playerMove.contains("9") && board[Integer.parseInt(playerMove)] != " ") {
                 System.out.println("Taken, Enter a different spot (0-8) or 9 for minimax: ");
                 playerMove = scanner.nextLine();
+                if (playerMove.contains("9"))
+                    break;
             }
             if (playerMove.contains("9"))
                 makeBestMove(board, player1, player2);

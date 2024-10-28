@@ -38,10 +38,10 @@ def isDraw(board):
     return not board.__contains__(" ")
 
 
-def miniMax(board, depth, isMaximizing):
-    if checkWinner(board, player2) == player2:
+def miniMax(board, depth, isMaximizing, maxPlayer, minPlayer):
+    if checkWinner(board, maxPlayer) == maxPlayer:
         return 2
-    elif checkWinner(board, player1) == player1:
+    elif checkWinner(board, minPlayer) == minPlayer:
         return -2
     elif isDraw(board):
         return 0
@@ -49,8 +49,8 @@ def miniMax(board, depth, isMaximizing):
         bestScore = -1
         for i, spot in enumerate(board):
             if spot == " ":
-                board[i] = player2
-                score = miniMax(board, depth + 1, False)
+                board[i] = maxPlayer
+                score = miniMax(board, depth + 1, False, maxPlayer, minPlayer)
                 board[i] = " "
                 bestScore = max(score, bestScore)
         return bestScore
@@ -58,69 +58,26 @@ def miniMax(board, depth, isMaximizing):
         bestScore = 1
         for i, spot in enumerate(board):
             if spot == " ":
-                board[i] = player1
-                score = miniMax(board, depth + 1, True)
+                board[i] = minPlayer
+                score = miniMax(board, depth + 1, True, maxPlayer, minPlayer)
                 board[i] = " "
                 bestScore = min(score, bestScore)
         return bestScore
 
 
-def miniMaxForPlayer(board, depth, isMaximizing):
-    if checkWinner(board, player2) == player2:
-        return -2
-    elif checkWinner(board, player1) == player1:
-        return 2
-    elif isDraw(board):
-        return 0
-
-    if isMaximizing:
-        bestScore = -1
-        for i, spot in enumerate(board):
-            if spot == " ":
-                board[i] = player1
-                score = miniMaxForPlayer(board, depth + 1, False)
-                board[i] = " "
-                bestScore = max(score, bestScore)
-        return bestScore
-    else:
-        bestScore = 1
-        for i, spot in enumerate(board):
-            if spot == " ":
-                board[i] = player2
-                score = miniMaxForPlayer(board, depth + 1, True)
-                board[i] = " "
-                bestScore = min(score, bestScore)
-        return bestScore
-
-
-def makeBestMove(board):
+def makeBestMove(board, maxPlayer, minPlayer):
     moveToMake = -1
     bestScore = -1
     for i, spot in enumerate(board):
         if spot == " ":
-            board[i] = player2
-            score = miniMax(board, 0, False)
+            board[i] = maxPlayer
+            score = miniMax(board, 0, False, maxPlayer, minPlayer)
             board[i] = " "
             if score > bestScore:
                 bestScore = score
                 moveToMake = i
     if moveToMake != -1:
-        makeMove(board, moveToMake, player2)
-
-
-def makeBestMoveForPlayer(board):
-    moveToMake = -1
-    bestScore = -1
-    for i, spot in enumerate(board):
-        if spot == " ":
-            board[i] = player1
-            score = miniMaxForPlayer(board, 0, False)
-            board[i] = " "
-            if score > bestScore:
-                bestScore = score
-                moveToMake = i
-    if moveToMake != -1:
-        makeMove(board, moveToMake, player1)
+        makeMove(board, moveToMake, maxPlayer)
 
 
 if __name__ == "__main__":
@@ -130,7 +87,7 @@ if __name__ == "__main__":
         while playerMove != "help" and board[int(playerMove[0])] != " ":
             playerMove = input("Taken, Enter a spot: ")
         if playerMove.__contains__("help"):
-            makeBestMoveForPlayer(board)
+            makeBestMove(board, player1, player2)
         else:
             makeMove(board, int(playerMove[0]), player1)
         if checkWinner(board, player1) == player1:
@@ -139,7 +96,7 @@ if __name__ == "__main__":
         elif isDraw(board):
             print("Draw")
             break
-        makeBestMove(board)
+        makeBestMove(board, player2, player1)
         if checkWinner(board, player2) == player2:
             print("Loser!")
             break
