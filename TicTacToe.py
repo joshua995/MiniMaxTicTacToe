@@ -81,7 +81,7 @@ def makeBestMove(board, maxPlayer, minPlayer):
 
 
 if __name__ == "__main__":
-    while 2:
+    while 1:
         displayBoard(board)
         playerMove = input("Enter a spot: ")
         while playerMove != "help" and board[int(playerMove[0])] != " ":
