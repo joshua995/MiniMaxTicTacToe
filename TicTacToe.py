@@ -34,8 +34,7 @@ def checkWinner(board, player):
         return player
 
 
-def isDraw(board):
-    return not board.__contains__(" ")
+isDraw = lambda board: not board.__contains__(" ")
 
 
 def miniMax(board, depth, isMaximizing, maxPlayer, minPlayer):
