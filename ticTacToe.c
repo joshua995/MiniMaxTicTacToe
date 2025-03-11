@@ -126,7 +126,7 @@ void main()
     {
         displayBoard(board);
         printf("Enter a spot (0-8): \n");
-        char *playerMove;
+        char playerMove[1];
         scanf("%s", playerMove);
         while (strcmp(playerMove, "9") && strcmp(board[atoi(playerMove)], " "))
         {
@@ -135,8 +135,10 @@ void main()
             if (!strcmp(playerMove, "9"))
                 break;
         }
-        if (!strcmp(playerMove, "9"))
+        if (!strcmp(playerMove, "9")){
+            printf("enter\n");
             makeBestMove(board, player1, player2);
+        }
         else
             makeMove(board, atoi(playerMove), player1);
         if (!strcmp(checkWinner(board, player1), player1))
