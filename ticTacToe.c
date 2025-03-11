@@ -57,7 +57,7 @@ int isDraw(char *board[])
     return !contains(board, " ");
 }
 
-float miniMax(char *board[], int depth, int isMaximizing, char *maxPlayer, char *minPlayer)
+double miniMax(char *board[], int depth, int isMaximizing, char *maxPlayer, char *minPlayer)
 {
     if (!strcmp(checkWinner(board, maxPlayer), maxPlayer))
         return 2;
@@ -135,10 +135,8 @@ void main()
             if (!strcmp(playerMove, "9"))
                 break;
         }
-        if (!strcmp(playerMove, "9")){
-            printf("enter\n");
+        if (!strcmp(playerMove, "9"))
             makeBestMove(board, player1, player2);
-        }
         else
             makeMove(board, atoi(playerMove), player1);
         if (!strcmp(checkWinner(board, player1), player1))
