@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 char *board[] = {" ", " ", " ", " ", " ", " ", " ", " ", " "};
 char *player1 = "O", *player2 = "X";
@@ -22,14 +23,21 @@ void displayBoard(char *board[])
     printf("%s|%s|%s\n", board[6], board[7], board[8]);
 }
 
-static void makeMove(char *board[], uint8_t position, char *currentPlayer)
+static void makeMove(char *board[], int position, char *currentPlayer)
 {
     board[position] = currentPlayer;
 }
 
 char *checkWinner(char *board[], char *player)
 {
-    if ((board[0] == board[1] && board[1] == board[2] && board[0] == player) || (board[3] == board[4] && board[4] == board[5] && board[3] == player) || (board[6] == board[7] && board[7] == board[8] && board[6] == player) || (board[0] == board[3] && board[3] == board[6] && board[0] == player) || (board[1] == board[4] && board[4] == board[7] && board[1] == player) || (board[2] == board[5] && board[5] == board[8] && board[2] == player) || (board[0] == board[4] && board[4] == board[8] && board[0] == player) || (board[6] == board[4] && board[4] == board[2] && board[6] == player))
+    if ((!strcmp(board[0], board[1]) && !strcmp(board[1], board[2]) && !strcmp(board[0], player)) ||
+        (!strcmp(board[3], board[4]) && !strcmp(board[4], board[5]) && !strcmp(board[3], player)) ||
+        (!strcmp(board[6], board[7]) && !strcmp(board[7], board[8]) && !strcmp(board[6], player)) ||
+        (!strcmp(board[0], board[3]) && !strcmp(board[3], board[6]) && !strcmp(board[0], player)) ||
+        (!strcmp(board[1], board[4]) && !strcmp(board[4], board[7]) && !strcmp(board[1], player)) ||
+        (!strcmp(board[2], board[5]) && !strcmp(board[5], board[8]) && !strcmp(board[2], player)) ||
+        (!strcmp(board[0], board[4]) && !strcmp(board[4], board[8]) && !strcmp(board[0], player)) ||
+        (!strcmp(board[6], board[4]) && !strcmp(board[4], board[2]) && !strcmp(board[6], player)))
         return player;
     return "";
 }
@@ -38,7 +46,7 @@ int contains(char *board[], char *target)
 {
     for (int i = 0; i < 9; i++)
     {
-        if (board[i] == target)
+        if (!strcmp(board[i], target))
             return 1;
     }
     return 0;
@@ -51,9 +59,9 @@ int isDraw(char *board[])
 
 float miniMax(char *board[], int depth, int isMaximizing, char *maxPlayer, char *minPlayer)
 {
-    if (checkWinner(board, maxPlayer) == maxPlayer)
+    if (!strcmp(checkWinner(board, maxPlayer), maxPlayer))
         return 2;
-    else if (checkWinner(board, minPlayer) == minPlayer)
+    else if (!strcmp(checkWinner(board, minPlayer), minPlayer))
         return -2;
     else if (isDraw(board))
         return 0;
@@ -63,7 +71,7 @@ float miniMax(char *board[], int depth, int isMaximizing, char *maxPlayer, char 
         double bestScore = -1;
         for (int i = 0; i < 9; i++)
         {
-            if (board[i] == " ")
+            if (!strcmp(board[i], " "))
             {
                 board[i] = maxPlayer;
                 double score = miniMax(board, depth + 1, 0, maxPlayer, minPlayer);
@@ -78,7 +86,7 @@ float miniMax(char *board[], int depth, int isMaximizing, char *maxPlayer, char 
         double bestScore = 1;
         for (int i = 0; i < 9; i++)
         {
-            if (board[i] == " ")
+            if (!strcmp(board[i], " "))
             {
                 board[i] = minPlayer;
                 double score = miniMax(board, depth + 1, 1, maxPlayer, minPlayer);
@@ -96,7 +104,7 @@ void makeBestMove(char *board[], char *maxPlayer, char *minPlayer)
     double bestScore = -1;
     for (int i = 0; i < 9; i++)
     {
-        if (board[i] == " ")
+        if (!strcmp(board[i], " "))
         {
             board[i] = maxPlayer;
             double score = miniMax(board, 0, 0, maxPlayer, minPlayer);
@@ -118,37 +126,38 @@ void main()
     {
         displayBoard(board);
         printf("Enter a spot (0-8): \n");
-        char * playerMove = input();
-        while (!playerMove.contains("9") && board[Integer.parseInt(playerMove)] != " ")
+        char *playerMove;
+        scanf("%s", playerMove);
+        while (strcmp(playerMove, "9") && strcmp(board[atoi(playerMove)], " "))
         {
-            System.out.println("Taken, Enter a different spot (0-8) or 9 for minimax: ");
-            playerMove = scanner.nextLine();
-            if (playerMove.contains("9"))
+            printf("Taken, Enter a different spot (0-8) or 9 for minimax: \n");
+            scanf("%s", playerMove);
+            if (!strcmp(playerMove, "9"))
                 break;
         }
-        if (playerMove.contains("9"))
+        if (!strcmp(playerMove, "9"))
             makeBestMove(board, player1, player2);
         else
-            makeMove(board, Integer.parseInt(playerMove), player1);
-        if (checkWinner(board, player1) == player1)
+            makeMove(board, atoi(playerMove), player1);
+        if (!strcmp(checkWinner(board, player1), player1))
         {
-            System.out.println("Winner!");
+            printf("Winner!\n");
             break;
         }
         else if (isDraw(board))
         {
-            System.out.println("Draw");
+            printf("Draw\n");
             break;
         }
         makeBestMove(board, player2, player1);
-        if (checkWinner(board, player2) == player2)
+        if (!strcmp(checkWinner(board, player2), player2))
         {
-            System.out.println("Loser!");
+            printf("Lost!\n");
             break;
         }
         else if (isDraw(board))
         {
-            System.out.println("Draw");
+            printf("Draw\n");
             break;
         }
     }
