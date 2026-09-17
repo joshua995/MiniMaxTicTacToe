@@ -3,6 +3,7 @@ Joshua Liu
 Bitmap Tic Tac Toe with MCTS
 2026-Sep-17
 */
+//TODO Add Comments
 
 package bitmap;
 
@@ -11,32 +12,30 @@ import java.util.List;
 import java.util.Random;
 
 class MCTSNode extends BitmapMCTSTTT {
-    private int state = 0;
-    private MCTSNode parent = null;
-    private int action = -1;
+    private int state;
+    private MCTSNode parent;
+    private int action;
     private boolean isPlayerOne = true;
     private MCTSNode[] children = new MCTSNode[9];
-    private int childCount = 0;
-    private int visits = 0;
-    private double wins = 0.0;
-    private int untriedActions = 0;
+    private int childCount;
+    private int visits;
+    private double wins;
+    private int untriedActions;
 
     public MCTSNode(int state, MCTSNode parent, int action, boolean isPlayerOne) {
         this.state = state;
         this.parent = parent;
         this.action = action;
         this.isPlayerOne = isPlayerOne;
-        this.visits = 0;
-        this.wins = 0.0;
         this.untriedActions = (~(state | (state >>> OFFSET))) & BOARD_MASK;
     }
 
-    public boolean isTerminal() {
+    boolean isTerminal() {
         return checkWinner(state) != 0
                 || ((state | (state >>> OFFSET)) & BOARD_MASK) == BOARD_MASK;
     }
 
-    public boolean isFullyExpanded() {
+    boolean isFullyExpanded() {
         return untriedActions == 0;
     }
 
@@ -56,29 +55,20 @@ class MCTSNode extends BitmapMCTSTTT {
     }
 
     public MCTSNode bestChild(double c) {
-        for (MCTSNode child : this.children) {
-            if (child == null) {
-                break;
-            }
-            if (child.visits == 0) {
-                return child;
-            }
-        }
-
         MCTSNode best = null;
         double bestScore = Double.NEGATIVE_INFINITY;
-        for (MCTSNode child : this.children) {
-            if (child == null) {
-                break;
-            }
-            double exploit = (double) child.wins / child.visits;
-            double explore = c * Math.sqrt(
-                    Math.log(this.visits) / child.visits);
 
-            double ucb = exploit + explore;
+        for (int i = 0; i < childCount; i++) {
+            MCTSNode child = children[i];
 
-            if (ucb > bestScore) {
-                bestScore = ucb;
+            if (child.visits == 0)
+                return child;
+
+            double score = (double) child.wins / child.visits
+                    + c * Math.sqrt(Math.log(visits) / child.visits);
+
+            if (score > bestScore) {
+                bestScore = score;
                 best = child;
             }
         }
@@ -98,34 +88,29 @@ class MCTSNode extends BitmapMCTSTTT {
             if (empty == 0) {
                 return 0;
             } // Count available moves
-            int count = Integer.bitCount(empty); // Choose one of the available moves
-            int target = rand.nextInt(count); // Find the target-th available bit
             int moves = empty;
-            int move = 0;
-            while (target-- >= 0) {
+            int target = rand.nextInt(Integer.bitCount(empty));
+            int move;
+
+            do {
                 move = Integer.numberOfTrailingZeros(moves);
                 moves &= moves - 1;
-            }
+            } while (target-- > 0);
             nState |= 1 << (player == 1 ? move : move + OFFSET);
             player = 3 - player;
         }
     }
 
     public void backpropagate(int winner) {
-        this.visits += 1;
-        if (winner == 0) {
-            this.wins += 0;
-        } else if (winner == (this.isPlayerOne ? 1 : 2)) {
-            this.wins += 1;
-        } else {
-            this.wins += -1;
-        }
-        if (this.parent != null) {
-            this.parent.backpropagate(winner);
+        for (MCTSNode node = this; node != null; node = node.parent) {
+            node.visits++;
+            if (winner != 0) {
+                node.wins += winner == (node.isPlayerOne ? 1 : 2) ? 1 : -1;
+            }
         }
     }
 
-    public int mctsSearch(int rootState, int iterations) {
+    public static int mctsSearch(int rootState, int iterations) {
         MCTSNode root = new MCTSNode(rootState, null, -1, false);
         for (int i = 0; i < iterations; i++) {
             MCTSNode node = root;
@@ -194,12 +179,12 @@ public class BitmapMCTSTTT {
                 // System.out.println();
 
                 if (isPlayerOne) {
-                    move = new MCTSNode(board, null, -1, true).mctsSearch(board, 5000);
+                    move = MCTSNode.mctsSearch(board, 5000);
                     // List<Integer> empty = availableActions(board);
                     // move = empty.get(rand.nextInt(empty.size()));
                     // System.out.printf("MCTS move: %d,%d\n", move[0], move[1]);
                 } else {
-                    move = new MCTSNode(board, null, -1, false).mctsSearch(board, 5000);
+                    move = MCTSNode.mctsSearch(board, 5000);
                     // List<Integer> empty = availableActions(board);
                     // move = empty.get(rand.nextInt(empty.size()));
                     // // System.out.printf("Random move: %d,%d\n", move[0], move[1]);
@@ -238,7 +223,6 @@ public class BitmapMCTSTTT {
     }
 
     static int checkWinner(int state) {
-
         int playerBoard1, playerBoard2;
 
         playerBoard1 = state & BOARD_MASK;
@@ -263,11 +247,8 @@ public class BitmapMCTSTTT {
         int empty = (~occupied) & 0x1FF;
 
         while (empty != 0) {
-
             int position = Integer.numberOfTrailingZeros(empty);
-
             availableActs.add(position);
-
             // Remove this available position
             empty &= empty - 1;
         }
@@ -276,10 +257,8 @@ public class BitmapMCTSTTT {
     }
 
     static int getCurrentPlayer(int state) {
-
-        int player1Count = Integer.bitCount(state & 0x1FF);
-        int player2Count = Integer.bitCount((state >>> 9) & 0x1FF);
-
-        return player1Count == player2Count ? 1 : 2;
+        return (Integer.bitCount((state | (state >>> OFFSET)) & BOARD_MASK) & 1) == 0
+                ? 1
+                : 2;
     }
 }
