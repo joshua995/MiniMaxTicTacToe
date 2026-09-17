@@ -1,3 +1,9 @@
+/*
+Joshua Liu
+Bitmap Tic Tac Toe with MCTS
+2026-Sep-17
+*/
+
 package bitmap;
 
 import java.util.ArrayList;
@@ -9,43 +15,51 @@ class MCTSNode extends BitmapMCTSTTT {
     private MCTSNode parent = null;
     private int action = -1;
     private boolean isPlayerOne = true;
-    private List<MCTSNode> children = new ArrayList<>();
+    private MCTSNode[] children = new MCTSNode[9];
+    private int childCount = 0;
     private int visits = 0;
     private double wins = 0.0;
-    private List<Integer> untriedActions = new ArrayList<>();
+    private int untriedActions = 0;
 
     public MCTSNode(int state, MCTSNode parent, int action, boolean isPlayerOne) {
         this.state = state;
         this.parent = parent;
         this.action = action;
         this.isPlayerOne = isPlayerOne;
-        this.children = new ArrayList<>();
         this.visits = 0;
         this.wins = 0.0;
-        this.untriedActions = availableActions(state);
+        this.untriedActions = (~(state | (state >>> OFFSET))) & BOARD_MASK;
     }
 
     public boolean isTerminal() {
-        return checkWinner(this.state) != 0
-                || availableActions(this.state).isEmpty();
+        return checkWinner(state) != 0
+                || ((state | (state >>> OFFSET)) & BOARD_MASK) == BOARD_MASK;
     }
 
     public boolean isFullyExpanded() {
-        return this.untriedActions.size() == 0;
+        return untriedActions == 0;
     }
 
     public MCTSNode expand() {
-        int action = this.untriedActions.remove(0);
-        int newState = this.state;
-        int playerToMove = getCurrentPlayer(this.state);
-        newState |= 1 << (playerToMove == 1 ? action : action + OFFSET); // Make a move
-        MCTSNode child = new MCTSNode(newState, this, action, (playerToMove == 1 ? true : false));
-        this.children.add(child);
+        int action = Integer.numberOfTrailingZeros(untriedActions);
+
+        // Remove action
+        untriedActions &= untriedActions - 1;
+
+        int playerToMove = getCurrentPlayer(state);
+
+        int newState = state |
+                (1 << (action + (playerToMove == 1 ? 0 : OFFSET)));
+        MCTSNode child = new MCTSNode(newState, this, action, playerToMove == 1);
+        this.children[this.childCount++] = child;
         return child;
     }
 
     public MCTSNode bestChild(double c) {
         for (MCTSNode child : this.children) {
+            if (child == null) {
+                break;
+            }
             if (child.visits == 0) {
                 return child;
             }
@@ -54,6 +68,9 @@ class MCTSNode extends BitmapMCTSTTT {
         MCTSNode best = null;
         double bestScore = Double.NEGATIVE_INFINITY;
         for (MCTSNode child : this.children) {
+            if (child == null) {
+                break;
+            }
             double exploit = (double) child.wins / child.visits;
             double explore = c * Math.sqrt(
                     Math.log(this.visits) / child.visits);
@@ -76,13 +93,21 @@ class MCTSNode extends BitmapMCTSTTT {
             if (winner != 0) {
                 return winner;
             }
-            List<Integer> actions = availableActions(nState);
-            if (actions.size() == 0) {
+            int occupied = (nState | (nState >>> OFFSET)) & BOARD_MASK;
+            int empty = (~occupied) & BOARD_MASK;
+            if (empty == 0) {
                 return 0;
+            } // Count available moves
+            int count = Integer.bitCount(empty); // Choose one of the available moves
+            int target = rand.nextInt(count); // Find the target-th available bit
+            int moves = empty;
+            int move = 0;
+            while (target-- >= 0) {
+                move = Integer.numberOfTrailingZeros(moves);
+                moves &= moves - 1;
             }
-            int move = actions.get(new Random().nextInt(actions.size()));
             nState |= 1 << (player == 1 ? move : move + OFFSET);
-            player = player == 2 ? 1 : 2;
+            player = 3 - player;
         }
     }
 
@@ -113,8 +138,11 @@ class MCTSNode extends BitmapMCTSTTT {
             int winner = node.rollout();
             node.backpropagate(winner);
         }
-        MCTSNode best = root.children.get(0);
+        MCTSNode best = root.children[0];
         for (MCTSNode child : root.children) {
+            if (child == null) {
+                break;
+            }
             if (child.visits > best.visits) {
                 best = child;
             }
@@ -142,6 +170,7 @@ public class BitmapMCTSTTT {
             0b001010100 // 2 4 6
     };
     static List<Integer> winnerList = new ArrayList<>();
+    static final Random rand = new Random();
 
     public static void main(String[] args) {
         for (int rounds = 0; rounds < 10000; rounds++) {
@@ -165,12 +194,14 @@ public class BitmapMCTSTTT {
                 // System.out.println();
 
                 if (isPlayerOne) {
-                    move = new MCTSNode(board, null, -1, true).mctsSearch(board, 7500);
+                    move = new MCTSNode(board, null, -1, true).mctsSearch(board, 5000);
                     // List<Integer> empty = availableActions(board);
-                    // move = empty.get(new Random().nextInt(empty.size()));
+                    // move = empty.get(rand.nextInt(empty.size()));
                     // System.out.printf("MCTS move: %d,%d\n", move[0], move[1]);
                 } else {
-                    move = new MCTSNode(board, null, -1, false).mctsSearch(board, 7500);
+                    move = new MCTSNode(board, null, -1, false).mctsSearch(board, 5000);
+                    // List<Integer> empty = availableActions(board);
+                    // move = empty.get(rand.nextInt(empty.size()));
                     // // System.out.printf("Random move: %d,%d\n", move[0], move[1]);
                 }
 
